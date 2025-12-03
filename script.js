@@ -1,4 +1,6 @@
-// Quiz questions required by Cypress
+// -------------------------------
+// QUIZ DATA (required by Cypress)
+// -------------------------------
 const quizData = [
   {
     question: "What is the capital of France?",
@@ -6,8 +8,8 @@ const quizData = [
     answer: 2
   },
   {
-    question: "Which planet is known as the Red Planet?",
-    options: ["Earth", "Mars", "Jupiter", "Venus"],
+    question: "What is the highest mountain in the world?",
+    options: ["K2", "Mount Everest", "Kangchenjunga", "Lhotse"],
     answer: 1
   },
   {
@@ -27,68 +29,88 @@ const quizData = [
   }
 ];
 
-const questionsContainer = document.getElementById("questions");
+// DOM ELEMENTS
+const questionsDiv = document.getElementById("questions");
+const scoreDiv = document.getElementById("score");
 const submitBtn = document.getElementById("submit");
-const scoreBox = document.getElementById("score");
 
-// Load saved progress from sessionStorage
+// ----------------------------------------------
+// Load stored answers from sessionStorage
+// ----------------------------------------------
 let savedProgress = JSON.parse(sessionStorage.getItem("progress")) || {};
 
-// Build the quiz UI
+// ----------------------------------------------
+// DISPLAY QUIZ
+// ----------------------------------------------
 function loadQuiz() {
-  questionsContainer.innerHTML = "";
+  questionsDiv.innerHTML = ""; // clear before render
 
   quizData.forEach((q, index) => {
-    const div = document.createElement("div");
+    const questionBox = document.createElement("div");
 
+    // question text
     const qText = document.createElement("p");
-    qText.textContent = q.question;
-    div.appendChild(qText);
+    qText.innerText = q.question;
+    questionBox.appendChild(qText);
 
-    q.options.forEach((opt, optIndex) => {
+    // options
+    q.options.forEach((option, optIndex) => {
       const label = document.createElement("label");
+      const radio = document.createElement("input");
 
-      const input = document.createElement("input");
-      input.type = "radio";
-      input.name = "q" + index;
-      input.value = optIndex;
+      radio.type = "radio";
+      radio.name = `q${index}`;
+      radio.value = optIndex;
 
-      // Restore session storage progress
-      if (savedProgress[index] == optIndex) {
-        input.checked = true;
-        input.setAttribute("checked", "true"); // 🔥 REQUIRED for Cypress
+      // Restore checked state from sessionStorage
+      if (savedProgress[`q${index}`] == optIndex) {
+        radio.checked = true;
       }
 
       // Save progress on change
-      input.addEventListener("change", () => {
-        savedProgress[index] = optIndex;
+      radio.addEventListener("change", () => {
+        savedProgress[`q${index}`] = optIndex;
         sessionStorage.setItem("progress", JSON.stringify(savedProgress));
       });
 
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(opt));
-      div.appendChild(label);
-      div.appendChild(document.createElement("br"));
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(option));
+      questionBox.appendChild(label);
+      questionBox.appendChild(document.createElement("br"));
     });
 
-    questionsContainer.appendChild(div);
+    questionsDiv.appendChild(questionBox);
   });
 }
 
-loadQuiz();
-
-// Handle submission
+// ----------------------------------------------
+// CALCULATE SCORE + SAVE TO LOCAL STORAGE
+// ----------------------------------------------
 submitBtn.addEventListener("click", () => {
   let score = 0;
 
   quizData.forEach((q, index) => {
-    if (savedProgress[index] == q.answer) {
+    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    if (selected && Number(selected.value) === q.answer) {
       score++;
     }
   });
 
-  scoreBox.textContent = `Your score is ${score} out of 5.`;
+  const result = `Your score is ${score} out of ${quizData.length}.`;
 
-  // Save final score in local storage
+  scoreDiv.textContent = result;
+
+  // Save score
   localStorage.setItem("score", score);
 });
+
+// Render quiz
+loadQuiz();
+
+// ----------------------------------------------
+// ON PAGE LOAD: display last score if exists
+// ----------------------------------------------
+const storedScore = localStorage.getItem("score");
+if (storedScore !== null) {
+  scoreDiv.textContent = `Your score is ${storedScore} out of ${quizData.length}.`;
+}
