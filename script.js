@@ -30,17 +30,22 @@ const questions = [
 const questionsDiv = document.getElementById("questions");
 const scoreDiv = document.getElementById("score");
 
-// ---------------------- LOAD SAVED PROGRESS ----------------------
+// Load saved progress from sessionStorage
 let savedProgress = JSON.parse(sessionStorage.getItem("progress")) || {};
+
 
 // ---------------------- RENDER QUESTIONS ----------------------
 questions.forEach((q, qIndex) => {
+
+  // Create question wrapper <div>
   const questionBlock = document.createElement("div");
 
+  // Create question title
   const qTitle = document.createElement("p");
   qTitle.textContent = q.question;
   questionBlock.appendChild(qTitle);
 
+  // Create options
   q.options.forEach((opt, optIndex) => {
     const label = document.createElement("label");
     label.style.display = "block";
@@ -50,13 +55,13 @@ questions.forEach((q, qIndex) => {
     radio.name = `question_${qIndex}`;
     radio.value = optIndex;
 
-    // Restore saved answer and set "checked" attribute for Cypress
+    // Restore saved answer and ensure Cypress detects "checked"
     if (savedProgress[qIndex] == optIndex) {
       radio.checked = true;
-      radio.setAttribute("checked", "true"); // REQUIRED by Cypress
+      radio.setAttribute("checked", "true");
     }
 
-    // When user selects an option → save to sessionStorage
+    // While selecting → save progress
     radio.addEventListener("change", () => {
       savedProgress[qIndex] = optIndex;
       sessionStorage.setItem("progress", JSON.stringify(savedProgress));
@@ -67,8 +72,10 @@ questions.forEach((q, qIndex) => {
     questionBlock.appendChild(label);
   });
 
+  // Append question block to #questions
   questionsDiv.appendChild(questionBlock);
 });
+
 
 // ---------------------- SUBMIT QUIZ ----------------------
 document.getElementById("submit").addEventListener("click", () => {
@@ -83,11 +90,12 @@ document.getElementById("submit").addEventListener("click", () => {
   const resultText = `Your score is ${score} out of ${questions.length}.`;
   scoreDiv.textContent = resultText;
 
-  // Store score in localStorage
+  // Save score to localStorage
   localStorage.setItem("score", score);
 });
 
-// ---------------------- SHOW SAVED SCORE (IF EXISTS) ----------------------
+
+// ---------------------- RESTORE SAVED SCORE ----------------------
 const savedScore = localStorage.getItem("score");
 if (savedScore !== null) {
   scoreDiv.textContent = `Your score is ${savedScore} out of ${questions.length}.`;
