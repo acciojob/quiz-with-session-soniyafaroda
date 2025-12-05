@@ -1,39 +1,39 @@
-// ----------- QUIZ QUESTIONS -----------
+// ---------------------- QUIZ QUESTIONS ----------------------
 const questions = [
   {
-    question: "1. What is the capital of India?",
-    options: ["Mumbai", "Delhi", "Kolkata", "Chennai"],
+    question: "What is the capital of France?",
+    options: ["London", "Berlin", "Paris", "Rome"],
+    answer: 2
+  },
+  {
+    question: "Which planet is known as the Red Planet?",
+    options: ["Earth", "Mars", "Jupiter", "Saturn"],
     answer: 1
   },
   {
-    question: "2. Which one is a programming language?",
-    options: ["HTML", "CSS", "JavaScript", "PNG"],
-    answer: 2
-  },
-  {
-    question: "3. What is 2 + 2?",
-    options: ["3", "4", "5", "6"],
+    question: "What is the largest mammal?",
+    options: ["Elephant", "Blue Whale", "Giraffe", "Shark"],
     answer: 1
   },
   {
-    question: "4. Which planet is known as the Red Planet?",
-    options: ["Earth", "Venus", "Mars", "Jupiter"],
-    answer: 2
+    question: "What do plants absorb for photosynthesis?",
+    options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"],
+    answer: 1
   },
   {
-    question: "5. What is H2O?",
-    options: ["Oxygen", "Hydrogen", "Water", "Acid"],
-    answer: 2
+    question: "Which gas do humans need to breathe?",
+    options: ["Carbon Dioxide", "Oxygen", "Hydrogen", "Nitrogen"],
+    answer: 1
   }
 ];
 
 const questionsDiv = document.getElementById("questions");
 const scoreDiv = document.getElementById("score");
 
-// ----------- LOAD SAVED PROGRESS FROM SESSION STORAGE -----------
+// ---------------------- LOAD SAVED PROGRESS ----------------------
 let savedProgress = JSON.parse(sessionStorage.getItem("progress")) || {};
 
-// ----------- DISPLAY QUESTIONS -----------
+// ---------------------- RENDER QUESTIONS ----------------------
 questions.forEach((q, qIndex) => {
   const questionBlock = document.createElement("div");
 
@@ -50,12 +50,13 @@ questions.forEach((q, qIndex) => {
     radio.name = `question_${qIndex}`;
     radio.value = optIndex;
 
-    // Restore saved answer
+    // Restore saved answer and set "checked" attribute for Cypress
     if (savedProgress[qIndex] == optIndex) {
       radio.checked = true;
+      radio.setAttribute("checked", "true"); // REQUIRED by Cypress
     }
 
-    // Save progress when selected
+    // When user selects an option → save to sessionStorage
     radio.addEventListener("change", () => {
       savedProgress[qIndex] = optIndex;
       sessionStorage.setItem("progress", JSON.stringify(savedProgress));
@@ -69,7 +70,7 @@ questions.forEach((q, qIndex) => {
   questionsDiv.appendChild(questionBlock);
 });
 
-// ----------- ON SUBMIT: CALCULATE & STORE SCORE -----------
+// ---------------------- SUBMIT QUIZ ----------------------
 document.getElementById("submit").addEventListener("click", () => {
   let score = 0;
 
@@ -79,15 +80,15 @@ document.getElementById("submit").addEventListener("click", () => {
     }
   });
 
-  const resultText = `Your score is ${score} out of 5.`;
+  const resultText = `Your score is ${score} out of ${questions.length}.`;
   scoreDiv.textContent = resultText;
 
-  // Save final score to local storage
+  // Store score in localStorage
   localStorage.setItem("score", score);
 });
 
-// ----------- SHOW SAVED SCORE IF EXISTS -----------
+// ---------------------- SHOW SAVED SCORE (IF EXISTS) ----------------------
 const savedScore = localStorage.getItem("score");
 if (savedScore !== null) {
-  scoreDiv.textContent = `Your score is ${savedScore} out of 5.`;
+  scoreDiv.textContent = `Your score is ${savedScore} out of ${questions.length}.`;
 }
